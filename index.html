@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Voice Recorder</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+
+        #recordButton {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: none;
+            background: #2196F3;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        #recordButton.recording {
+            background: #f44336;
+        }
+
+        #recordButton:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+<button id="recordButton">Удерживай</button>
+
+<script>
+let mediaRecorder;
+let chunks = [];
+let stream;
+
+const button = document.getElementById("recordButton");
+
+async function init() {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+}
+
+async function startRecording() {
+    if (!stream) {
+        await init();
+    }
+
+    chunks = [];
+
+    mediaRecorder = new MediaRecorder(stream);
+
+    mediaRecorder.ondataavailable = e => {
+        if (e.data.size > 0) {
+            chunks.push(e.data);
+        }
+    };
+
+    mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: "audio/webm" });
+        const audio = new Audio(URL.createObjectURL(blob));
+        audio.play();
+    };
+
+    mediaRecorder.start();
+
+    button.classList.add("recording");
+    button.textContent = "Запись...";
+}
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+    }
+
+    button.classList.remove("recording");
+    button.textContent = "Удерживай";
+}
+
+button.addEventListener("pointerdown", async (e) => {
+    e.preventDefault();
+    await startRecording();
+});
+
+button.addEventListener("pointerup", stopRecording);
+button.addEventListener("pointerleave", stopRecording);
+button.addEventListener("pointercancel", stopRecording);
+</script>
+
+</body>
+  </html>
