@@ -2,11 +2,17 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Voice Recorder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Голосовой тренажёр</title>
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -14,31 +20,45 @@
             font-family: Arial, sans-serif;
         }
 
-        #recordButton1 {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .instructions {
+            text-align: center;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .instructions h2 {
+            margin: 0 0 15px;
+        }
+
+        .instructions p {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        #recordButton {
+            width: 50vw;
+            height: 50vw;
+            /*max-width: 320px;
+            max-height: 320px;/*
+
             border: none;
+            border-radius: 50%;
             background: #2196F3;
             color: white;
-            font-size: 22px;
+            font-size: 28px;
             cursor: pointer;
             user-select: none;
-            transition: background 0.2s;
-        }
-        #recordButton {
-    width: 50vw;
-    height: 50vw;
-    max-width: 300px;
-    max-height: 300px;
-    border-radius: 50%;
-    border: none;
-    background: #2196F3;
-    color: white;
-    font-size: 22px;
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.2s;
+            transition: background .2s, transform .1s;
         }
 
         #recordButton.recording {
@@ -52,7 +72,22 @@
 </head>
 <body>
 
-<button id="recordButton">Удерживай</button>
+<div class="container">
+
+    <div class="instructions">
+        <h2>🎤 Голосовой тренажёр</h2>
+
+        <p>
+            Нажмите и удерживайте кнопку для записи.<br>
+            Пока удерживаете кнопку — говорите.<br>
+            После отпускания запись сразу воспроизводится.<br>
+            Следующее нажатие начинает новую запись.
+        </p>
+    </div>
+
+    <button id="recordButton">Удерживай</button>
+
+</div>
 
 <script>
 let mediaRecorder;
@@ -62,7 +97,9 @@ let stream;
 const button = document.getElementById("recordButton");
 
 async function init() {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream = await navigator.mediaDevices.getUserMedia({
+        audio: true
+    });
 }
 
 async function startRecording() {
@@ -74,7 +111,7 @@ async function startRecording() {
 
     mediaRecorder = new MediaRecorder(stream);
 
-    mediaRecorder.ondataavailable = e => {
+    mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
             chunks.push(e.data);
         }
@@ -82,6 +119,7 @@ async function startRecording() {
 
     mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: "audio/webm" });
+
         const audio = new Audio(URL.createObjectURL(blob));
         audio.play();
     };
@@ -112,4 +150,4 @@ button.addEventListener("pointercancel", stopRecording);
 </script>
 
 </body>
-  </html>
+</html>
